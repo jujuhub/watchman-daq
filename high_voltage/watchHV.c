@@ -1,10 +1,11 @@
-/* This script contains functions used to automate the CAEN 
- * DT5533EP power supply to test 100 PMTs for WATCHMAN at 
- * Boulby. Based on Morgan Askins's scripts for SCOUT.
+/* This script contains functions used to automate the CAEN DT5533EP power 
+ * supply used to test 100 WATCHMAN PMTs at Boulby. Based on Morgan Askins's 
+ * scripts for SCOUT.
  * 
  * Written by: Julie He <juhe@ucdavis.edu>
- * Started July 23, 2018; last updated July 24, 2018
+ * Started July 23, 2018; last updated July 31, 2018
  */
+
 
 #include <unistd.h>
 #include <stdio.h>
@@ -43,6 +44,24 @@ int force_initCAEN()
 	initCAEN();
 }
 
+int initSettings(ushort chNum, char *param, float paramVal)
+{
+	// set initial settings that won't change during testing
+	// user choice or hard-coded? Note: PS remembers prev settings
+	// RUp, RDwn, ISet, Trip
+
+	initCAEN();
+
+	ushort slot = 0;
+	const ushort chList[1] = {chNum};
+//	float ISet = 200.; // uA
+//	float RUp = 100., RDwn = 150.; // V/s
+	
+	CAENHVRESULT cRes = CAENHV_SetChParam( handle, slot, param, 1, chList, &paramVal );
+
+	return cRes;
+}
+
 int testBdPres()
 {
 	// returns board info; #TODO may have declared variables incorrectly
@@ -62,45 +81,90 @@ int testBdPres()
 	return cRes;
 }
 
-char *getChParamList()
+int getChParamList()
 {
 	// list names and number of parameters for chNum; returns str
 
 	initCAEN();
 
 	ushort slot = 0;
-	ushort chNum = 3;
-	char *paramNameList = (char *)NULL;
+	char *paramNameList = (char *)NULL; // cast
 	char (*param)[MAX_PARAM_NAME]; // ptr to MAX_PARAM_NAME size array of strs
 	int numParam = 0;
 
-	CAENHVRESULT cRes = CAENHV_GetChParamInfo( handle, slot, chNum, &paramNameList, &numParam );
+	CAENHVRESULT cRes = CAENHV_GetChParamInfo( handle, slot, 0, &paramNameList, &numParam );
 
-	printf("List of Parameters in Ch %d:\n", chNum);
+	param = (char (*)[MAX_PARAM_NAME])paramNameList; // cast
 
-	param = (char (*)[MAX_PARAM_NAME])paramNameList;
-
+	printf("Number of Parameters: %d\n", numParam); // may not be printing all?
+	printf("List of Parameters To Set:\n");
 	for (size_t i = 0; i < MAX_PARAM_NAME; ++i)
 	{
 		printf("%s  ", param[i]);
 	}
 	printf("\n");
 
-	// PDwn status
+	return cRes;
+}
+
+int togglePower(ushort chNum, int pwONOFF)
+{
+	// toggle power status for chNum; 0 is OFF, 1 is ON
+
+	initCAEN();
+
+	ushort slot = 0;
+	const ushort chList[1]  = {chNum}; // makes 1-elem array with chNum as val
+	int pwStatus = 0;
+
+	CAENHVRESULT cRes = CAENHV_SetChParam( handle, slot, "Pw", 1, chList, &pwONOFF );
+	cRes = CAENHV_GetChParam( handle, slot, "Pw", 1, chList, &pwStatus );
+
+	return pwStatus;
+}
+
+int setChVoltage(ushort chNum, float newVSet)
+{
+	// set the voltage of a channel
+
+	initCAEN();
+
+	ushort slot = 0;
 	const ushort chList[1] = {chNum};
-	int pwDwn_status = 0;
-	int status = 0;
+	float currVSet = 0.;
 
-	CAENHVRESULT res0 = CAENHV_GetChParam( handle, slot, "Pw", chNum, 
-							chList, &pwDwn_status );
-//	CAENHVRESULT res1 = CAENHV_SetChParam( handle, slot, "Pw", chNum, chList, &status );
-	CAENHVRESULT res1 = CAENHV_SetChParam( handle, slot, "Pw", 1, chList, &status );
-	res0 = CAENHV_GetChParam( handle, slot, "Pw", chNum, 
-				chList, &pwDwn_status );
-	printf("CAENHVRESULT: %d %d %d\n", cRes, res0, res1);
-	printf("Power: %d\n", pwDwn_status);
+	// print current VSet
+	CAENHVRESULT cRes = CAENHV_GetChParam( handle, slot, "VSet", 1, chList, &currVSet );
+	if (cRes == CAENHV_OK)
+	{
+		printf("Current VSet: %.2fV \n", currVSet);
+	} else { printf("ERROR: FAILED to get current VSet.\n"); }
 
-	return param[0];
+	// set new VSet
+	cRes = CAENHV_SetChParam( handle, slot, "VSet", 1, chList, &newVSet );
+	if (cRes == CAENHV_OK)
+	{
+		return 0;
+	} else { printf("ERROR: FAILED to set new VSet.\n"); }
+}
+
+float getFloatParameter(ushort chNum, char *param)
+{
+	// get the current float type parameter value
+	// IMon, Vmon, etc
+
+	initCAEN();
+
+	ushort slot = 0;
+	const ushort chList[1] = {chNum};
+	float *paramVal = (float *)malloc(sizeof(float)); // why?
+
+	CAENHVRESULT cRes = CAENHV_GetChParam( handle, slot, param, 1, chList, paramVal );
+
+	if (cRes == CAENHV_OK)
+	{
+		return paramVal[0];
+	} else { printf("ERROR: FAILED to read current %s value.\n", param); }
 }
 
 int setChParam(ushort chNum, const char *param, float paramVal)
@@ -117,22 +181,3 @@ int setChParam(ushort chNum, const char *param, float paramVal)
 	return cRes;
 }
 
-int togglePower(ushort chNum, int pwONOFF)
-{
-	// toggle power status for chNum; 0 is OFF, 1 is ON
-
-	initCAEN();
-
-	ushort slot = 0;
-	const ushort chList[1]  = {chNum};
-	int pwStatus = 0;
-
-	CAENHVRESULT cRes = CAENHV_SetChParam( handle, slot, "Pw", 1, chList, &pwONOFF );
-	CAENHVRESULT cRes2 = CAENHV_GetChParam( handle, slot, "Pw", 1, chList, &pwStatus );
-
-	if ( pwStatus == 1 ) printf("Ch %d is ON\n", chNum);
-	else if ( pwStatus == 0 ) printf("Ch %d is OFF\n", chNum);
-	else printf("Invalid power status\n");
-
-	return pwStatus;
-}
