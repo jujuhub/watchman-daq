@@ -3,7 +3,7 @@
  * scripts for SCOUT.
  * 
  * Written by: Julie He <juhe@ucdavis.edu>
- * Started July 23, 2018; last updated July 31, 2018
+ * Started July 23, 2018; last updated August 1, 2018
  */
 
 
@@ -25,16 +25,16 @@ int initCAEN()
 		// Init the system; see CAENHVWrapper.h/PDF for some values
 		CAENHV_SYSTEM_TYPE_t system = DT55XXE;
 		int linkType = LINKTYPE_USB_VCP;
-		char *argStr = "ttyACM0_9600_8_1_0_0"; // "commport_baudrate_commdata_commstop_commparity_lbusaddress" for USB_VCP
+		char *argStr = "ttyACM0_9600_8_1_0_0"; // "commport_baudrate_commdata_commstop_commparity_lbusaddr" for USB_VCP
 		char *username = "", *passwd = "";
 
 		// Connect to HV power supply; returns int
-		CAENHVRESULT cRes = CAENHV_InitSystem( system, linkType, argStr, 
+		CAENHVRESULT res = CAENHV_InitSystem( system, linkType, argStr, 
 							username, passwd, &handle );
 
 //		printf("Handle status: %d\n", handle); // handle changes, in other functions too
 
-		return cRes;
+		return res;
 	}
 }
 
@@ -46,20 +46,18 @@ int force_initCAEN()
 
 int initSettings(ushort chNum, char *param, float paramVal)
 {
-	// set initial settings that won't change during testing
-	// user choice or hard-coded? Note: PS remembers prev settings
-	// RUp, RDwn, ISet, Trip
+	// set params to default/user-choice values
+	// note: PS remembers prev settings
+	// options: ISet, MaxV, RUp, RDwn, Trip
 
 	initCAEN();
 
 	ushort slot = 0;
 	const ushort chList[1] = {chNum};
-//	float ISet = 200.; // uA
-//	float RUp = 100., RDwn = 150.; // V/s
 	
-	CAENHVRESULT cRes = CAENHV_SetChParam( handle, slot, param, 1, chList, &paramVal );
+	CAENHVRESULT res = CAENHV_SetChParam( handle, slot, param, 1, chList, &paramVal );
 
-	return cRes;
+	return res;
 }
 
 int testBdPres()
@@ -74,11 +72,11 @@ int testBdPres()
 	ushort serNum = 0;
 	uchar fmwRelMin = 0, fmwRelMax = 0;
 
-	CAENHVRESULT cRes = CAENHV_TestBdPresence( handle, slot, &numChs, &bdModel, &description, &serNum, &fmwRelMin, &fmwRelMax );
+	CAENHVRESULT res = CAENHV_TestBdPresence( handle, slot, &numChs, &bdModel, &description, &serNum, &fmwRelMin, &fmwRelMax );
 
 	printf("Number of channels: %d | Board model: %s | Description: %s | Serial number: %d\n", numChs, bdModel, description, serNum);
 	
-	return cRes;
+	return res;
 }
 
 int getChParamList()
@@ -92,7 +90,7 @@ int getChParamList()
 	char (*param)[MAX_PARAM_NAME]; // ptr to MAX_PARAM_NAME size array of strs
 	int numParam = 0;
 
-	CAENHVRESULT cRes = CAENHV_GetChParamInfo( handle, slot, 0, &paramNameList, &numParam );
+	CAENHVRESULT res = CAENHV_GetChParamInfo( handle, slot, 0, &paramNameList, &numParam );
 
 	param = (char (*)[MAX_PARAM_NAME])paramNameList; // cast
 
@@ -104,7 +102,7 @@ int getChParamList()
 	}
 	printf("\n");
 
-	return cRes;
+	return res;
 }
 
 int togglePower(ushort chNum, int pwONOFF)
@@ -117,8 +115,8 @@ int togglePower(ushort chNum, int pwONOFF)
 	const ushort chList[1]  = {chNum}; // makes 1-elem array with chNum as val
 	int pwStatus = 0;
 
-	CAENHVRESULT cRes = CAENHV_SetChParam( handle, slot, "Pw", 1, chList, &pwONOFF );
-	cRes = CAENHV_GetChParam( handle, slot, "Pw", 1, chList, &pwStatus );
+	CAENHVRESULT res = CAENHV_SetChParam( handle, slot, "Pw", 1, chList, &pwONOFF );
+	res = CAENHV_GetChParam( handle, slot, "Pw", 1, chList, &pwStatus );
 
 	return pwStatus;
 }
@@ -134,15 +132,15 @@ int setChVoltage(ushort chNum, float newVSet)
 	float currVSet = 0.;
 
 	// print current VSet
-	CAENHVRESULT cRes = CAENHV_GetChParam( handle, slot, "VSet", 1, chList, &currVSet );
-	if (cRes == CAENHV_OK)
+	CAENHVRESULT res = CAENHV_GetChParam( handle, slot, "VSet", 1, chList, &currVSet );
+	if (res == CAENHV_OK)
 	{
 		printf("Current VSet: %.2fV \n", currVSet);
 	} else { printf("ERROR: FAILED to get current VSet.\n"); }
 
 	// set new VSet
-	cRes = CAENHV_SetChParam( handle, slot, "VSet", 1, chList, &newVSet );
-	if (cRes == CAENHV_OK)
+	res = CAENHV_SetChParam( handle, slot, "VSet", 1, chList, &newVSet );
+	if (res == CAENHV_OK)
 	{
 		return 0;
 	} else { printf("ERROR: FAILED to set new VSet.\n"); }
@@ -159,9 +157,9 @@ float getFloatParameter(ushort chNum, char *param)
 	const ushort chList[1] = {chNum};
 	float *paramVal = (float *)malloc(sizeof(float)); // why?
 
-	CAENHVRESULT cRes = CAENHV_GetChParam( handle, slot, param, 1, chList, paramVal );
+	CAENHVRESULT res = CAENHV_GetChParam( handle, slot, param, 1, chList, paramVal );
 
-	if (cRes == CAENHV_OK)
+	if (res == CAENHV_OK)
 	{
 		return paramVal[0];
 	} else { printf("ERROR: FAILED to read current %s value.\n", param); }
@@ -176,8 +174,8 @@ int setChParam(ushort chNum, const char *param, float paramVal)
 	ushort slot = 0;
 	const ushort chList[1] = {chNum};
 
-	CAENHVRESULT cRes = CAENHV_SetChParam( handle, slot, param, chNum, chList, &paramVal );
+	CAENHVRESULT res = CAENHV_SetChParam( handle, slot, param, chNum, chList, &paramVal );
 
-	return cRes;
+	return res;
 }
 
