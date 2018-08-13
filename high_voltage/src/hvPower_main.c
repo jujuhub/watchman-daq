@@ -13,18 +13,14 @@ int main(int argc, char *argv[])
 	int res = -1, toggle = 0;
 
 	if (argc != 2) { printf("Number of arguments given does not match number of arguments expected (2).\n"); }
-	else { toggle = (int)argv[1]; } // #TODO need to figure out how to properly cast or incorporate passing arg into shell script or 2 if statements
+	else { toggle = (int)argv[1]; } // #TODO need to figure out how to properly cast / incorporate passing str arg into shell script / 2 if statements with or conditions
 
 	for (ushort chNum = 0; chNum <= 3; chNum++)
 	{
 		res = togglePower(chNum, toggle);
-		if (res == 0 && toggle = 1) { printf("Successfully turned ON Ch %d\n", chNum); }
-		else if (res == 0 && toggle = 0) { printf("Successfully turned OFF Ch %d\n", chNum); }
-		else
-		{ 
-			printf("ERROR: Unsuccessful communication with power supply");
-			return -1;
-		}
+		if (res == 0 && toggle = 1) { printf("CH %d: Successfully turned ON\n", chNum); }
+		else if (res == 0 && toggle = 0) { printf("CH %d: Successfully turned OFF\n", chNum); }
+		else { printf("ERROR: Unsuccessful communication with power supply"); }
 	}
 
 	return res;

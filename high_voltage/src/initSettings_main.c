@@ -12,49 +12,33 @@ int main()
 	// options: ISet, MaxV, RUp, RDwn, Trip
 
 	int res = -1;
+	float ISet = 200., MaxV = 1800., RUp = 100., RDwn = 150.;
 
 	for (ushort chNum = 0; chNum <= 3; chNum++)
 	{
 		// ISet; default: 200. uA
-		res = initSettings(chNum, "ISet", 200.);
+		res = initSettings(chNum, "ISet", ISet);
 		sleep(2);
-		if (res == 0)
-		{ 
-			printf("Successfully set ISet to 200. uA for Ch %d\n", chNum);
-		}
-	}
+		if (res == 0) {	printf("CH %d: Successfully set ISet to %.2f uA\n", chNum, ISet); }
+		else { printf("CH %d: ERROR. COULD NOT SET ISet\n"); }
 
-	for (ushort chNum = 0; chNum <= 3; chNum++)
-	{
 		// MaxV; default: 1800. V
-		res = initSettings(chNum, "MaxV", 1800.);
+		res = initSettings(chNum, "MaxV", MaxV);
 		sleep(2);
-		if (res == 0)
-		{ 
-			printf("Successfully set MaxV to 1800. V for Ch %d\n", chNum);
-		}
-	}
+		if (res == 0) {	printf("CH %d: Successfully set MaxV to %.2f V\n", chNum, MaxV); }
+		else { printf("CH %d: ERROR. COULD NOT SET MaxV\n"); }
 
-	for (ushort chNum = 0; chNum <= 3; chNum++)
-	{
 		// RUp; default: 100. V/s
-		res = initSettings(chNum, "RUp", 100.);
+		res = initSettings(chNum, "RUp", RUp);
 		sleep(2);
-		if (res == 0)
-		{ 
-			printf("Successfully set RUp to 100. V/s for Ch %d\n", chNum);
-		}
-	}
+		if (res == 0) {	printf("CH %d: Successfully set RUp to %.2f V/s\n", chNum, RUp); }
+		else { printf("CH %d: ERROR. COULD NOT SET RUp\n"); }
 
-	for (ushort chNum = 0; chNum <= 3; chNum++)
-	{
 		// RDwn; default: 150. V/s
-		res = initSettings(chNum, "RDwn", 150.);
+		res = initSettings(chNum, "RDwn", RDwn);
 		sleep(2);
-		if (res == 0)
-		{ 
-			printf("Successfully set RDwn to 150. V/s for Ch %d\n", chNum);
-		}
+		if (res == 0) {	printf("CH %d: Successfully set RDwn to %.2f V/s\n", chNum, RDwn); }
+		else { printf("CH %d: ERROR. COULD NOT SET RDwn\n"); }
 	}
 
 	return res;
