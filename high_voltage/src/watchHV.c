@@ -133,17 +133,13 @@ int setChVoltage(ushort chNum, float newVSet)
 
 	// print current VSet
 	CAENHVRESULT res = CAENHV_GetChParam( handle, slot, "VSet", 1, chList, &currVSet );
-	if (res == CAENHV_OK)
-	{
-		printf("Current VSet: %.2fV \n", currVSet);
-	} else { printf("ERROR: FAILED to get current VSet.\n"); }
+	if (res == CAENHV_OK) { printf("Current VSet: %.2fV \n", currVSet);	}
+	else { printf("ERROR: Failed to get current VSet.\n"); }
 
 	// set new VSet
 	res = CAENHV_SetChParam( handle, slot, "VSet", 1, chList, &newVSet );
-	if (res == CAENHV_OK)
-	{
-		return 0;
-	} else { printf("ERROR: FAILED to set new VSet.\n"); }
+	if (res == CAENHV_OK) {	return 0; } 
+	else { printf("ERROR: Failed to set new VSet.\n"); }
 }
 
 float getFloatParameter(ushort chNum, char *param)
@@ -159,10 +155,8 @@ float getFloatParameter(ushort chNum, char *param)
 
 	CAENHVRESULT res = CAENHV_GetChParam( handle, slot, param, 1, chList, paramVal );
 
-	if (res == CAENHV_OK)
-	{
-		return paramVal[0];
-	} else { printf("ERROR: FAILED to read current %s value.\n", param); }
+	if (res == CAENHV_OK) {	return paramVal[0];	} 
+	else { printf("ERROR: Failed to read current %s value.\n", param); }
 }
 
 int setChParam(ushort chNum, const char *param, float paramVal)
