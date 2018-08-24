@@ -15,21 +15,26 @@ int main(int argc, char *argv[])
 
 	if (argc != 2)
 	{
-		printf("Number of args given does not match number expected [2].\n");
+		printf("ERROR: Please provide power status [ON/OFF].\n");
 		exit(1);
 	}
 	else if (strcmp(argv[1], "ON") == 0) { toggle = 1; }
 	else if (strcmp(argv[1], "OFF") == 0) { toggle = 0; }
+	else
+	{
+		printf("ERROR: Invalid input. Please input \"ON\" or \"OFF\".\n");
+		exit(1);
+	}
 
-	printf("toggle = %d\n", toggle);
+//	printf("toggle = %d\n", toggle);
 
 	for (ushort chNum = 0; chNum <= 3; chNum++)
 	{
 		res = togglePower(chNum, toggle);
 		sleep(2);
 //		printf("res = %d\n", res);
-		if (res == CAENHV_OK && toggle == 1) { printf("CH %d: Successfully turned ON\n", chNum); }
-		else if (res == CAENHV_OK && toggle == 0) { printf("CH %d: Successfully turned OFF\n", chNum); }
+		if (res == 1 && toggle == 1) { printf("CH %d: Successfully turned ON\n", chNum); }
+		else if (res == 1 && toggle == 0) { printf("CH %d: Successfully turned OFF\n", chNum); }
 		else { printf("ERROR: Unsuccessful communication with power supply\n"); }
 	}
 

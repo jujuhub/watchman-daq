@@ -3,7 +3,7 @@
  * scripts for SCOUT.
  * 
  * Written by: Julie He <juhe@ucdavis.edu>
- * Started July 23, 2018; last updated August 1, 2018
+ * Last updated: August 17, 2018
  */
 
 
@@ -132,7 +132,7 @@ int setChVoltage(ushort chNum, float newVSet)
 	float currVSet = 0.;
 
 	// print current VSet
-	CAENHVRESULT res = CAENHV_GetChParam( handle, slot, "VSet", 1, chList, &currVSet );
+	CAENHVRESULT res = CAENHV_GetChParam(handle, slot, "VSet", 1, chList, &currVSet);
 	if (res == CAENHV_OK) { printf("Current VSet: %.2fV \n", currVSet);	}
 	else { printf("ERROR: Failed to get current VSet.\n"); }
 
