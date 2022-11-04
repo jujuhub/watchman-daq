@@ -20,7 +20,7 @@ int main()
 //	CAENHVRESULT res = CAENHV_DeinitSystem(handle);
 
 	ushort chNum = 0;
-	int pwONOFF = 0; // 0: OFF; 1: ON
+	int pwONOFF = 1; // 0: OFF; 1: ON
 	int pwStatus = togglePower(chNum, pwONOFF);
 
 	sleep(2);
@@ -29,10 +29,10 @@ int main()
     else if ( pwStatus == 0 ) printf("Ch %d is OFF\n", chNum);
     else printf("Invalid power status\n");
 
-	printf("VMon: %.2f\n", getChVoltage(chNum));
-	printf("VMon: %.2f\n", getChVoltage(chNum));
+//	printf("VMon: %.2f\n", getChVoltage(chNum));
+//	printf("VMon: %.2f\n", getChVoltage(chNum));
 
-	float VSet = 0.;
+	float VSet = 100.;
 	ret = setChVoltage(chNum, VSet);
 
 	sleep(5);
@@ -42,12 +42,12 @@ int main()
 		printf("Successfully set VSet!\n");
 	}
 
-	printf("VMon: %.2f\n", getChVoltage(chNum));
-	printf("VMon: %.2f\n", getChVoltage(chNum));
-	printf("VMon: %.2f\n", getChVoltage(chNum));
-	sleep(2);
-	printf("VMon: %.2f\n", getChVoltage(chNum));
-	printf("VMon: %.2f\n", getChVoltage(chNum));
+//	printf("VMon: %.2f\n", getChVoltage(chNum));
+//	printf("VMon: %.2f\n", getChVoltage(chNum));
+//	printf("VMon: %.2f\n", getChVoltage(chNum));
+//	sleep(2);
+//	printf("VMon: %.2f\n", getChVoltage(chNum));
+//	printf("VMon: %.2f\n", getChVoltage(chNum));
 
 	return 0;
 }
